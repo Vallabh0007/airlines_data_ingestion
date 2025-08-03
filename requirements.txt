@@ -1,0 +1,4 @@
+boto3
+azure-storage-blob
+psycopg2
+kafka-python
