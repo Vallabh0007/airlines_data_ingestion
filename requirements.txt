@@ -1,4 +1,4 @@
 boto3
 azure-storage-blob
-psycopg2
+psycopg2-binary
 kafka-python
