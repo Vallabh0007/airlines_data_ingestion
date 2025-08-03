@@ -109,6 +109,11 @@ def main():
         for _ in range(50):
             event = generate_click_event()
             producer.send(KAFKA_TOPIC, event)
+            # Save a copy locally in staging
+            staging_dir = "./data/staging/clickstream"
+            os.makedirs(staging_dir, exist_ok=True)
+            with open(f"{staging_dir}/clickstream_{int(time.time())}.json", "a") as f:
+                f.write(json.dumps(event) + "\n")
         print("[Kafka] Published 50 events")
 
         # 2️⃣ Hourly tasks (simulated every 60 cycles)
@@ -125,6 +130,13 @@ def main():
             with open(csv_filename, "rb") as data:
                 blob_client.upload_blob(data, overwrite=True)
             print(f"[Azurite] Uploaded {csv_filename}")
+            # Save a local copy in staging
+            staging_dir = "./data/staging/bookings"
+            os.makedirs(staging_dir, exist_ok=True)
+            staging_path = os.path.join(staging_dir, csv_filename)
+            with open(csv_filename, "rb") as src, open(staging_path, "wb") as dst:
+                dst.write(src.read())
+            print(f"[Staging] Saved local copy {staging_path}")
 
             # 2b. Write CSV to LocalStack S3
             s3.upload_file(csv_filename, S3_BUCKET, csv_filename)

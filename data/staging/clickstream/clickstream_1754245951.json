@@ -1,0 +1,7 @@
+{"user": "Diana", "action": "view", "page": "home", "timestamp": "2025-08-03T18:32:31.000172"}
+{"user": "Diana", "action": "purchase", "page": "checkout", "timestamp": "2025-08-03T18:32:31.000883"}
+{"user": "Diana", "action": "search", "page": "home", "timestamp": "2025-08-03T18:32:31.001670"}
+{"user": "Bob", "action": "click", "page": "checkout", "timestamp": "2025-08-03T18:32:31.002461"}
+{"user": "Alice", "action": "click", "page": "home", "timestamp": "2025-08-03T18:32:31.002930"}
+{"user": "Charlie", "action": "search", "page": "home", "timestamp": "2025-08-03T18:32:31.003704"}
+{"user": "Diana", "action": "click", "page": "home", "timestamp": "2025-08-03T18:32:31.004117"}
