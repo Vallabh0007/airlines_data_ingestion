@@ -1,0 +1,4 @@
+{"user": "Alice", "action": "view", "page": "flights", "timestamp": "2025-08-04T04:56:22.993036"}
+{"user": "Charlie", "action": "click", "page": "checkout", "timestamp": "2025-08-04T04:56:22.995564"}
+{"user": "Alice", "action": "view", "page": "home", "timestamp": "2025-08-04T04:56:22.996244"}
+{"user": "Charlie", "action": "view", "page": "flights", "timestamp": "2025-08-04T04:56:22.997922"}

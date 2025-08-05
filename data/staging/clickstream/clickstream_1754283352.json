@@ -1,0 +1,3 @@
+{"user": "Charlie", "action": "search", "page": "checkout", "timestamp": "2025-08-04T04:55:52.000104"}
+{"user": "Bob", "action": "view", "page": "home", "timestamp": "2025-08-04T04:55:52.001178"}
+{"user": "Diana", "action": "click", "page": "flights", "timestamp": "2025-08-04T04:55:52.001321"}

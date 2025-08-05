@@ -1,13 +1,12 @@
-# ingest_bronze.py
 import os
+import sys
+import glob
 from pyspark.sql import SparkSession, functions as F
 from pyspark.sql.types import (
     StructType, StructField, StringType, DoubleType, TimestampType
 )
 from delta import configure_spark_with_delta_pip
 from delta.tables import DeltaTable
-import os
-import glob
 
 # -----------------------------------------
 # SPARK SESSION
@@ -20,21 +19,28 @@ builder = (
 )
 
 spark = configure_spark_with_delta_pip(builder).getOrCreate()
-# -----------------------------------------
-# PATHS
-# -----------------------------------------
-BRONZE_PATH = "./data/bronze"
-os.makedirs(BRONZE_PATH, exist_ok=True)
 
+# -----------------------------------------
+# PATHS (read from CLI or fallback)
+# -----------------------------------------
+BASE_PATH = sys.argv[1] if len(sys.argv) > 1 else "./data"
+STAGING_PATH = os.path.join(BASE_PATH, "staging")
+BRONZE_PATH = os.path.join(BASE_PATH, "bronze")
+
+os.makedirs(BRONZE_PATH, exist_ok=True)
+os.makedirs(os.path.join(STAGING_PATH, "bookings"), exist_ok=True)
 
 # -----------------------------------------
 # CLICKSTREAM INGEST
 # -----------------------------------------
 def ingest_clickstream():
-    input_path = "./data/staging/clickstream"
-    output_path = f"{BRONZE_PATH}/clickstream"
+    input_path = os.path.join(STAGING_PATH, "clickstream")
+    output_path = os.path.join(BRONZE_PATH, "clickstream")
 
-    # Explicit schema to avoid infer error
+    if not os.path.exists(input_path) or not os.listdir(input_path):
+        print(f"[Bronze] No clickstream files found at {input_path}, skipping.")
+        return
+
     schema = StructType([
         StructField("user", StringType(), True),
         StructField("action", StringType(), True),
@@ -44,16 +50,12 @@ def ingest_clickstream():
 
     clickstream_df = spark.read.schema(schema).json(input_path)
 
-    # Convert timestamp to proper type
-    clickstream_df = clickstream_df.withColumn(
-        "timestamp", F.to_timestamp("timestamp")
+    clickstream_df = (
+        clickstream_df
+        .withColumn("timestamp", F.to_timestamp("timestamp"))
+        .withColumn("event_date", F.to_date("timestamp"))
+        .dropDuplicates(["user", "timestamp", "page"])
     )
-
-    # Add event_date column for partitioning
-    clickstream_df = clickstream_df.withColumn("event_date", F.to_date("timestamp"))
-
-    # Deduplicate on (user, timestamp, page)
-    clickstream_df = clickstream_df.dropDuplicates(["user", "timestamp", "page"])
 
     if DeltaTable.isDeltaTable(spark, output_path):
         bronze_table = DeltaTable.forPath(spark, output_path)
@@ -74,20 +76,20 @@ def ingest_clickstream():
             .save(output_path)
         )
 
-    print("[Bronze] Clickstream ingested with deduplication & late-arrival handling")
+    print(f"[Bronze] Clickstream ingested to {output_path}")
 
 # -----------------------------------------
 # BOOKINGS INGEST
 # -----------------------------------------
-os.makedirs("./data/staging/bookings", exist_ok=True)
-
 def ingest_bookings():
-    input_path = "./data/staging/bookings/*.csv"
-    output_path = f"{BRONZE_PATH}/bookings"
-    if not glob.glob(input_path):
-        print("[Bronze] No booking files found, skipping ingestion.")
+    input_path = os.path.expanduser(os.path.join(STAGING_PATH, "bookings", "*.csv"))
+    output_path = os.path.join(BRONZE_PATH, "bookings")
+
+    booking_files = glob.glob(input_path)
+    if not booking_files:
+        print(f"[Bronze] No booking files found at {input_path}, skipping.")
         return
-    # Define schema explicitly
+
     bookings_schema = StructType([
         StructField("booking_id", StringType(), True),
         StructField("customer", StringType(), True),
@@ -98,14 +100,14 @@ def ingest_bookings():
     bookings_df = (
         spark.read.schema(bookings_schema)
         .option("header", True)
-        .csv(input_path)
+        .csv(booking_files)
     )
 
-    # Add booking_date column for partitioning
-    bookings_df = bookings_df.withColumn("booking_date", F.to_date("timestamp"))
-
-    # Deduplicate on booking_id
-    bookings_df = bookings_df.dropDuplicates(["booking_id"])
+    bookings_df = (
+        bookings_df
+        .withColumn("booking_date", F.to_date("timestamp"))
+        .dropDuplicates(["booking_id"])
+    )
 
     if DeltaTable.isDeltaTable(spark, output_path):
         bronze_table = DeltaTable.forPath(spark, output_path)
@@ -126,7 +128,7 @@ def ingest_bookings():
             .save(output_path)
         )
 
-    print("[Bronze] Bookings ingested with deduplication & late-arrival handling")
+    print(f"[Bronze] Bookings ingested to {output_path}")
 
 # -----------------------------------------
 # MAIN
@@ -135,3 +137,4 @@ if __name__ == "__main__":
     ingest_clickstream()
     ingest_bookings()
     print("[Bronze] Ingestion complete")
+    spark.stop()

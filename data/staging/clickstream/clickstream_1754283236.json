@@ -1,0 +1,10 @@
+{"user": "Alice", "action": "purchase", "page": "flights", "timestamp": "2025-08-04T04:53:56.982299"}
+{"user": "Charlie", "action": "search", "page": "home", "timestamp": "2025-08-04T04:53:56.985852"}
+{"user": "Alice", "action": "search", "page": "checkout", "timestamp": "2025-08-04T04:53:56.986597"}
+{"user": "Bob", "action": "search", "page": "home", "timestamp": "2025-08-04T04:53:56.988604"}
+{"user": "Alice", "action": "view", "page": "checkout", "timestamp": "2025-08-04T04:53:56.990427"}
+{"user": "Charlie", "action": "click", "page": "flights", "timestamp": "2025-08-04T04:53:56.992761"}
+{"user": "Diana", "action": "purchase", "page": "flights", "timestamp": "2025-08-04T04:53:56.994394"}
+{"user": "Charlie", "action": "purchase", "page": "checkout", "timestamp": "2025-08-04T04:53:56.995911"}
+{"user": "Charlie", "action": "click", "page": "home", "timestamp": "2025-08-04T04:53:56.997828"}
+{"user": "Diana", "action": "view", "page": "home", "timestamp": "2025-08-04T04:53:56.998770"}
