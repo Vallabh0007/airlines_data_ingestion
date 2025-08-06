@@ -1,0 +1,7 @@
+# HELP ticket_revenue_last_hour Total ticket revenue in last hour
+# TYPE ticket_revenue_last_hour gauge
+ticket_revenue_last_hour 0 1754504499
+
+# HELP active_sessions_last_15m Active sessions in last 15 minutes
+# TYPE active_sessions_last_15m gauge
+active_sessions_last_15m 0 1754504499

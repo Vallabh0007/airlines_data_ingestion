@@ -3,6 +3,8 @@ import os
 import sys
 from pyspark.sql import SparkSession, functions as F
 from delta.tables import DeltaTable
+from metrics import write_prometheus_metrics
+
 
 # -----------------------------------------
 # SPARK SESSION
@@ -141,5 +143,7 @@ if __name__ == "__main__":
 
     # Compute KPIs
     compute_kpis(fact_orders, clickstream_df)
+    write_prometheus_metrics(fact_orders, clickstream_df, metrics_dir="./metrics")
+
 
     print("✅ Step 4 complete: Star schema + KPIs created.")
